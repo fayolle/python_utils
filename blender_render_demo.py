@@ -71,11 +71,11 @@ class ColorObj:
 				 H = 0.5, S = 1.0, V = 1.0,\
 				 B = 0.0, C = 0.0):
 		self.H = H 
-        self.S = S 
-        self.V = V 
-        self.RGBA = RGBA
-        self.B = B 
-        self.C = C 
+		self.S = S 
+		self.V = V 
+		self.RGBA = RGBA
+		self.B = B 
+		self.C = C 
 
 
 def initColorNode(tree, color):

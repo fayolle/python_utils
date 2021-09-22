@@ -67,10 +67,10 @@ def readOBJ(file_path, location, rotation_euler, scale):
 
 
 class ColorObj:
-    def __init__(self, RGBA = (144.0/255, 210.0/255, 236.0/255, 1), \
-    H = 0.5, S = 1.0, V = 1.0,\
-    B = 0.0, C = 0.0):
-        self.H = H 
+	def __init__(self, RGBA = (144.0/255, 210.0/255, 236.0/255, 1), \
+				 H = 0.5, S = 1.0, V = 1.0,\
+				 B = 0.0, C = 0.0):
+		self.H = H 
         self.S = S 
         self.V = V 
         self.RGBA = RGBA
@@ -79,56 +79,56 @@ class ColorObj:
 
 
 def initColorNode(tree, color):
-    HSV = tree.nodes.new('ShaderNodeHueSaturation')
-    HSV.inputs['Color'].default_value = color.RGBA
-    HSV.inputs['Saturation'].default_value = color.S
-    HSV.inputs['Value'].default_value = color.V
-    HSV.inputs['Hue'].default_value = color.H
-    BS = tree.nodes.new('ShaderNodeBrightContrast')
-    BS.inputs['Bright'].default_value = color.B
-    BS.inputs['Contrast'].default_value = color.C
-    tree.links.new(HSV.outputs['Color'], BS.inputs['Color'])
-    return BS
+	HSV = tree.nodes.new('ShaderNodeHueSaturation')
+	HSV.inputs['Color'].default_value = color.RGBA
+	HSV.inputs['Saturation'].default_value = color.S
+	HSV.inputs['Value'].default_value = color.V
+	HSV.inputs['Hue'].default_value = color.H
+	BS = tree.nodes.new('ShaderNodeBrightContrast')
+	BS.inputs['Bright'].default_value = color.B
+	BS.inputs['Contrast'].default_value = color.C
+	tree.links.new(HSV.outputs['Color'], BS.inputs['Color'])
+	return BS
 
 
 def setMaterial(mesh, mesh_color):
-    mat = bpy.data.materials.new('MeshMaterial')
-    mesh.data.materials.append(mat)
-    mesh.active_material = mat
-    mat.use_nodes = True
-    tree = mat.node_tree
+	mat = bpy.data.materials.new('MeshMaterial')
+	mesh.data.materials.append(mat)
+	mesh.active_material = mat
+	mat.use_nodes = True
+	tree = mat.node_tree
 
-    BCNode = initColorNode(tree, mesh_color)
+	BCNode = initColorNode(tree, mesh_color)
 
-    fresnel = tree.nodes.new('ShaderNodeFresnel')
-    fresnel.inputs[0].default_value = 1.3
+	fresnel = tree.nodes.new('ShaderNodeFresnel')
+	fresnel.inputs[0].default_value = 1.3
 
-    glass = tree.nodes.new('ShaderNodeBsdfGlass')
-    tree.links.new(BCNode.outputs['Color'], glass.inputs['Color'])
+	glass = tree.nodes.new('ShaderNodeBsdfGlass')
+	tree.links.new(BCNode.outputs['Color'], glass.inputs['Color'])
 
-    transparent = tree.nodes.new('ShaderNodeBsdfTransparent')
-    tree.links.new(BCNode.outputs['Color'], transparent.inputs['Color'])
+	transparent = tree.nodes.new('ShaderNodeBsdfTransparent')
+	tree.links.new(BCNode.outputs['Color'], transparent.inputs['Color'])
 
-    multiply = tree.nodes.new('ShaderNodeMixRGB')
-    multiply.blend_type = 'MULTIPLY'
-    multiply.inputs['Fac'].default_value = 1
-    multiply.inputs['Color2'].default_value = (1,1,1,1)
-    tree.links.new(fresnel.outputs['Fac'], multiply.inputs['Color1'])
+	multiply = tree.nodes.new('ShaderNodeMixRGB')
+	multiply.blend_type = 'MULTIPLY'
+	multiply.inputs['Fac'].default_value = 1
+	multiply.inputs['Color2'].default_value = (1,1,1,1)
+	tree.links.new(fresnel.outputs['Fac'], multiply.inputs['Color1'])
 
-    mix1 = tree.nodes.new('ShaderNodeMixShader')
-    mix1.inputs['Fac'].default_value = 0.7
-    tree.links.new(glass.outputs[0], mix1.inputs[1])
-    tree.links.new(transparent.outputs[0], mix1.inputs[2])
+	mix1 = tree.nodes.new('ShaderNodeMixShader')
+	mix1.inputs['Fac'].default_value = 0.7
+	tree.links.new(glass.outputs[0], mix1.inputs[1])
+	tree.links.new(transparent.outputs[0], mix1.inputs[2])
 
-    glossy = tree.nodes.new('ShaderNodeBsdfGlossy')
-    glossy.inputs['Color'].default_value = (0.8, 0.72, 0.437, 1)
+	glossy = tree.nodes.new('ShaderNodeBsdfGlossy')
+	glossy.inputs['Color'].default_value = (0.8, 0.72, 0.437, 1)
 
-    mix2 = tree.nodes.new('ShaderNodeMixShader')
-    tree.links.new(multiply.outputs[0], mix2.inputs[0])
-    tree.links.new(mix1.outputs[0], mix2.inputs[1])
-    tree.links.new(glossy.outputs[0], mix2.inputs[2])
+	mix2 = tree.nodes.new('ShaderNodeMixShader')
+	tree.links.new(multiply.outputs[0], mix2.inputs[0])
+	tree.links.new(mix1.outputs[0], mix2.inputs[1])
+	tree.links.new(glossy.outputs[0], mix2.inputs[2])
 
-    tree.links.new(mix2.outputs[0], tree.nodes['Material Output'].inputs['Surface'])
+	tree.links.new(mix2.outputs[0], tree.nodes['Material Output'].inputs['Surface'])
 
 
 def createInvisibleGround(location = (0,0,0), ground_size = 5, shadow_light = 0.7):

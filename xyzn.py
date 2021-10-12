@@ -29,7 +29,7 @@ def write_xyzn(filename, coords, normals):
         f.write(str(x) + ' ' + str(y) + ' ' + str(z) + ' ' + 
                 str(nx) + ' ' + str(ny) + ' ' + str(nz) + '\n')
 
-    f.close
+    f.close()
 
     
 def read_xyzn(ps_filename):

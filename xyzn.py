@@ -32,6 +32,31 @@ def write_xyzn(filename, coords, normals):
     f.close()
 
     
+def write_xyz(filename, coords):
+    '''
+    Write the samples coordinates (coords)
+    to the file (given its name).
+    
+    xyz Format is:
+    x1 y1 z1
+    x2 y2 z2
+    ...
+    xn yn zn
+    '''
+
+    assert(len(coords[0]) == 3)
+
+    f = open(filename, 'w')
+
+    l = len(coords)
+    for i in range(l):
+        x,y,z = coords[i]
+        
+        f.write(str(x) + ' ' + str(y) + ' ' + str(z) + '\n')
+
+    f.close()
+
+    
 def read_xyzn(ps_filename):
     f = open(ps_filename)
 
@@ -51,3 +76,6 @@ def read_xyzn(ps_filename):
     f.close()
     return np.array(point_set)
 
+
+# Legal? 
+#read_xyz = read_xyzn

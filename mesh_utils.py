@@ -47,46 +47,6 @@ def dist(V, F):
     return sparse.csr_matrix(W)
 
 
-def quaternion_matrix(x):
-    a, b, c, d = x.tolist()
-    return np.array([[a, -b, -c, -d],
-                     [b,  a, -d,  c],
-                     [c,  d,  a, -b],
-                     [d, -c,  b,  a]])
-
-
-def dirac(V, F):
-    l = dist(V, F)
-    Af = area(F, l)
-    Av = np.zeros(V.shape[0])
-
-    D = np.zeros((4 * F.shape[0], 4 * V.shape[0]))
-    DA = np.zeros((4 * V.shape[0], 4 * F.shape[0]))
-
-    for i in range(F.shape[0]):
-        for ind, j in enumerate(F[i]):
-            Av[j] += Af[i] / 3
-
-    for i in range(F.shape[0]):
-        for ind, j in enumerate(F[i]):
-            ind1 = F[i, (ind + 1) % 3]
-            ind2 = F[i, (ind + 2) % 3]
-
-            e1 = V[ind1]
-            e2 = V[ind2]
-
-            e = np.array([0, e1[0] - e2[0], e1[1] - e2[1], e1[2] - e2[2]])
-
-            mat = -quaternion_matrix(e) / (2 * Af[i])
-            D[i * 4:(i + 1) * 4, j * 4: (j + 1) * 4] = mat
-            DA[j * 4:(j + 1) * 4, i * 4: (i + 1) * 4] = mat.transpose() * Af[i] / Av[j]
-
-    D = sparse.csr_matrix(D)
-    DA = sparse.csr_matrix(DA)
-
-    return D, DA
-
-
 def area(F, l):
     areas = np.zeros(F.shape[0])
 
@@ -138,20 +98,6 @@ def cotangent_weights(F, a, l):
     return sp.sparse.csr_matrix(W), sp.sparse.diags(1/(A+1e-9), 0)
 
 
-def laplacian(W, A_inv):
-    """Return the Laplacian of the weigth matrix."""
-
-    # Degree matrix.
-    d = W.sum(axis=0)
-
-    D = sp.sparse.diags(d.A.squeeze(), 0)
-    L = A_inv * (D - W)
-
-    # assert np.abs(L - L.T).mean() < 1e-9
-    assert type(L) is sp.sparse.csr.csr_matrix
-    return L
-
-
 def adjacency_matrix_from_faces(F, num_vertices):
     A_v = np.zeros((num_vertices, num_vertices))
     A_f0 = np.zeros((num_vertices, num_vertices))
@@ -184,23 +130,9 @@ if __name__ == "__main__":
 
     W, _ = cotangent_weights(F, areas, dists)
     L = graph_laplacian(W, symmetric=False)
-    C = centroids(V, F)
-
-    D, DA = dirac(V, F)
-    D = D.todense()
-    DA = DA.todense()
 
     L = np.asarray(L.todense())
     P = np.asarray(np.matmul(L, V))
     x, y, z = V[:, 0], V[:, 1], V[:, 2]
     u, v, w = P[:, 0], P[:, 1], P[:, 2]
 
-    V_ = np.pad(P, [[0, 0], [1, 0]], 'constant')
-    V_ = V_.reshape(-1, 1)
-
-    F_ = np.matmul(D, V_)
-
-    F__ = np.matmul(DA, F_)
-
-    F_ = np.array(F_.reshape(-1).reshape(F.shape[0], -1))
-    F__ = np.array(F__.reshape(-1).reshape(V.shape[0], -1))

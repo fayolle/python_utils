@@ -4,7 +4,7 @@ from scipy import linalg
 from scipy.sparse import issparse, csr_matrix
 
 
-def graph_laplacian(W, normalized=True):
+def graph_laplacian(W, normalized=True, symmetric=True):
     '''
     Input:
     W = Adjacency matrix. Size = n x n.
@@ -25,11 +25,19 @@ def graph_laplacian(W, normalized=True):
         D = scipy.sparse.diags(d.A.squeeze(), 0)
         L = D - W
     else:
-        d += np.spacing(np.array(0, W.dtype)) # d += epsilon
-        d = 1.0 / np.sqrt(d)
-        D = scipy.sparse.diags(d.A.squeeze(), 0)
-        I = scipy.sparse.identity(d.size, dtype=W.dtype)
-        L = I - D * W * D
+        if symmetric: 
+            d += np.spacing(np.array(0, W.dtype)) # d += epsilon
+            d = 1.0 / np.sqrt(d)
+            D = scipy.sparse.diags(d.A.squeeze(), 0)
+            I = scipy.sparse.identity(d.size, dtype=W.dtype)
+            L = I - D * W * D
+        else:
+            d += np.spacing(np.array(0, W.dtype))
+            d = 1.0 / d
+            D = sparse.diags(d.A.squeeze(), 0)
+            I = sparse.identity(d.size, dtype=W.dtype)
+            L = I - D * w
+
     return L
 
 

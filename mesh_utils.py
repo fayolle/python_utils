@@ -14,16 +14,19 @@ def graph_laplacian(W, normalized=True, symmetric=True):
 
     # Laplacian matrix.
     if not normalized:
+        # Combinatorial Laplacian 
         D = sparse.diags(d.A.squeeze(), 0)
         L = D - W
     else:
         if symmetric:
+            # Normalized Laplacian
             d += np.spacing(np.array(0, W.dtype))
             d = 1 / np.sqrt(d)
             D = sparse.diags(d.A.squeeze(), 0)
             I = sparse.identity(d.size, dtype=W.dtype)
             L = I - D * W * D
         else:
+            # Random-walk Laplacian 
             d += np.spacing(np.array(0, W.dtype))
             d = 1.0 / d
             D = sparse.diags(d.A.squeeze(), 0)

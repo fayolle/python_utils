@@ -5,33 +5,26 @@ from scipy.sparse import issparse, csr_matrix
 
 
 def graph_laplacian(W, normalized=True, symmetric=True):
-    '''
-    Input:
-    W = Adjacency matrix. Size = n x n.
-    
-    Output:
-    L = Graph Laplacian. Size = n x n.
-    
-    Examples: 
-    L = compute_graph_laplacian(W); # compute normalized graph Laplacian
-    L = compute_graph_laplacian(W,False); # compute UNnormalized graph Laplacian
-    '''
+    """Return the Laplacian of the weigth matrix."""
     
     # Degree vector
     d = W.sum(axis=0)
 
     # Laplacian matrix
     if not normalized:
+        # Combinatorial Laplacian 
         D = scipy.sparse.diags(d.A.squeeze(), 0)
         L = D - W
     else:
-        if symmetric: 
+        if symmetric:
+            # Normalized Laplacian
             d += np.spacing(np.array(0, W.dtype)) # d += epsilon
             d = 1.0 / np.sqrt(d)
             D = scipy.sparse.diags(d.A.squeeze(), 0)
             I = scipy.sparse.identity(d.size, dtype=W.dtype)
             L = I - D * W * D
         else:
+            # Random-walk Laplacian 
             d += np.spacing(np.array(0, W.dtype))
             d = 1.0 / d
             D = sparse.diags(d.A.squeeze(), 0)
@@ -42,16 +35,7 @@ def graph_laplacian(W, normalized=True, symmetric=True):
 
 
 def graph_gradient(W):
-    '''
-    Input:
-    W = Adjacency matrix. Size = n x n.
-    
-    Output:
-    G = Graph Gradient Operator. Size = m x n.
-
-    Examples: 
-    G = compute_graph_gradient(W); # compute normalized graph Laplacian
-    '''
+    '''Return the (graph) gradient of the weight matrix W'''
     
     W = W.todense()
     n = W.shape[0]
@@ -141,19 +125,7 @@ def pairwise_distances(X, Y=None, metric="euclidean", n_jobs=1, **kwds):
 
 
 def construct_knn_graph(X,k):
-    '''
-    Compute a graph from an unstructured point-cloud. 
-    
-    Examples: 
-    W = construct_knn_graph(X,k)
-    
-    Input:
-    X = Data matrix. Size = n x d.
-    k = Number of nearest neaighbors. 
-    
-    Output:
-    W = Adjacency matrix. Size = n x n.
-    '''
+    '''Return the k-nearest neighbor graph'''
     
     n = X.shape[0]
     

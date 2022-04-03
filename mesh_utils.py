@@ -101,24 +101,6 @@ def cotangent_weights(F, a, l):
     return sp.sparse.csr_matrix(W), sp.sparse.diags(1/(A+1e-9), 0)
 
 
-def adjacency_matrix_from_faces(F, num_vertices):
-    A_v = np.zeros((num_vertices, num_vertices))
-    A_f0 = np.zeros((num_vertices, num_vertices))
-    A_f1 = np.zeros((num_vertices, num_vertices))
-
-    for f in range(F.shape[0]):
-        i, j, k = F[f].tolist()
-        A_v[i, j] = A_v[j, i] = 1
-        A_v[j, k] = A_v[k, j] = 1
-        A_v[k, i] = A_v[i, k] = 1
-
-        A_f[i][f] = 1
-        A_f[j][f] = 1
-        A_f[k][f] = 1
-
-    return sp.sparse.csr_matrix(A_v), sp.sparse.csr_matrix(A_f)
-
-
 def centroids(V, F):
     C = np.zeros(F.shape)
     for i in range(F.shape[0]):

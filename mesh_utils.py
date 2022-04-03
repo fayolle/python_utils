@@ -34,7 +34,7 @@ def graph_laplacian(W, normalized=True, symmetric=True):
             L = I - D * W
 
     # assert np.abs(L - L.T).mean() < 1e-9
-    assert type(L) is sparse.csr.csr_matrix
+    # assert type(L) is sparse.csr.csr_matrix
     return L
 
 
@@ -73,7 +73,7 @@ def uniform_weights(dist):
     W.setdiag(0)
     W.eliminate_zeros()
 
-    assert np.abs(W - W.T).mean() < 1e-10
+    # assert np.abs(W - W.T).mean() < 1e-10
     return W
 
 
@@ -84,7 +84,7 @@ def exp_weights(dist, sigma2):
     W.setdiag(0)
     W.eliminate_zeros()
 
-    assert np.abs(W - W.T).mean() < 1e-10
+    # assert np.abs(W - W.T).mean() < 1e-10
     return W
 
 
@@ -126,6 +126,69 @@ def centroids(V, F):
     return C
 
 
+def remove_duplicates(V, F):
+    uniq_V, inverse = np.unique(V, axis=0, return_inverse=True)
+    new_F = inverse[F]
+    return uniq_V, new_F, inverse
+
+
+def average_edge_length(V, F):
+    VF = V[F]
+    V0, V1, V2 = VF[:,0], VF[:,1], VF[:,2]
+
+    # side lengths
+    A = np.linalg.norm((V2-V1),axis=1)
+    B = np.linalg.norm((V0-V2),axis=1)
+    C = np.linalg.norm((V1-V0),axis=1)
+
+    return ((A+B+C).sum())/faces.shape[0]/3.0
+
+
+def compute_face_normals(V, F):
+    Ft = np.transpose(F)
+    Vt = np.transpose(V)
+
+    VV = [Vt.take(Ft[0], axis=1),
+          Vt.take(Ft[1], axis=1),
+          Vt.take(Ft[2], axis=1)]
+     
+    c = np.cross(VV[1]-VV[0], VV[2]-VV[0], axisa=0, axisb=0)
+    normals = c / np.linalg.norm(c, axis=0)
+
+    return normals
+
+
+def safe_arccos(x):
+    return np.arccos(x.clip(min=-1, max=1))
+
+
+def compute_vertex_normals(V, F, F_normals):
+    s0 = F_normals.shape[0]
+    if s0 != 3:
+        F_normals = np.transpose(F_normals)
+    
+    Ft = np.transpose(F)
+    Vt = np.transpose(V)
+    V_normals = np.zeros_like(Vt)
+
+    VV = [Vt.take(Ft[0], axis=1),
+          Vt.take(Ft[1], axis=1),
+          Vt.take(Ft[2], axis=1)]
+
+    for i in range(3):
+        d0 = VV[(i+1)%3] - VV[i]
+        d0 = d0 / np.linalg.norm(d0)
+        d1 = VV[(i+2)%3] - VV[i]
+        d1 = d1 / np.linalg.norm(d1)
+        face_angle = safe_arccos(np.sum(d0*d1, axis=0))
+        nn = F_normals * face_angle
+        for j in range(3):
+            V_idx = Ft[i,:]
+            V_normals[j,V_idx[:]] = V_normals[j,V_idx[:]] + nn[j,:]
+
+    return np.transpose(V_normals / np.linalg.norm(V_normals, axis=0), (0,1))
+
+
 if __name__ == "__main__":
     V, F = obj.read_obj("bunny.obj")
     dists = dist(V, F)
@@ -138,4 +201,8 @@ if __name__ == "__main__":
     P = np.asarray(np.matmul(L, V))
     x, y, z = V[:, 0], V[:, 1], V[:, 2]
     u, v, w = P[:, 0], P[:, 1], P[:, 2]
+
+    F_normals = compute_face_normals(V, F)
+    V_normals = compute_vertex_normals(V, F, F_normals)
+    
 

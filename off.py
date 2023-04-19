@@ -8,17 +8,16 @@ def read_off(filename):
 
     off = f.readline()
     off = off.strip()
-    assert(off.lower() == 'off')
+    assert (off.lower() == 'off')
 
     # number of vertices, triangles, edges
     nums = f.readline()
     nums = nums.strip()
     nums = nums.split()
-    assert(len(nums) == 3)
+    assert (len(nums) == 3)
     num_verts = int(nums[0])
     num_faces = int(nums[1])
     num_edges = int(nums[2])
-
 
     # list of vertices
     verts = []
@@ -26,7 +25,7 @@ def read_off(filename):
         line = f.readline()
         line = line.strip()
         line = line.split()
-        
+
         # skip empty lines
         while len(line) == 0:
             line = f.readline()
@@ -35,7 +34,6 @@ def read_off(filename):
 
         # TODO raise an error if there are no 3 elements
         verts.append((float(line[0]), float(line[1]), float(line[2])))
-
 
     # list of polygons
     tris = []
@@ -51,5 +49,3 @@ def read_off(filename):
 
     f.close()
     return (np.array(verts), np.array(tris))
-
-

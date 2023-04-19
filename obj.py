@@ -12,7 +12,7 @@ def read_obj(filename):
 
         line = line.strip().split(' ')
         if line[0] == 'v':  # vertex
-            V.append([float(line[i+1]) for i in range(3)])
+            V.append([float(line[i + 1]) for i in range(3)])
         elif line[0] == 'f':  # face
             face = line[1:]
             for i in range(0, len(face)):
@@ -34,9 +34,9 @@ def write_obj(filename, V, F):
 
     for i in range(F.size(0)):
         if F[i].abs().sum() > 0:
-            output += "f {} {} {}\n".format(F[i][0] + 1, F[i][1] + 1, F[i][2] + 1)
+            output += "f {} {} {}\n".format(F[i][0] + 1, F[i][1] + 1,
+                                            F[i][2] + 1)
 
     text_file = open(filename, "w")
     text_file.write(output)
     text_file.close()
-

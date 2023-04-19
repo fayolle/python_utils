@@ -15,23 +15,24 @@ def write_xyzn(filename, coords, normals):
     xn yn zn nxn nyn nzn
     '''
 
-    assert(len(coords) == len(normals))
-    assert(len(coords[0]) == 3)
-    assert(len(normals[0]) == 3)
+    assert (len(coords) == len(normals))
+    assert (len(coords[0]) == 3)
+    assert (len(normals[0]) == 3)
 
     f = open(filename, 'w')
 
     l = len(coords)
     for i in range(l):
-        x,y,z = coords[i]
+        x, y, z = coords[i]
         nx, ny, nz = normals[i]
-        
-        f.write(str(x) + ' ' + str(y) + ' ' + str(z) + ' ' + 
-                str(nx) + ' ' + str(ny) + ' ' + str(nz) + '\n')
+
+        f.write(
+            str(x) + ' ' + str(y) + ' ' + str(z) + ' ' + str(nx) + ' ' +
+            str(ny) + ' ' + str(nz) + '\n')
 
     f.close()
 
-    
+
 def write_xyz(filename, coords):
     '''
     Write the samples coordinates (coords)
@@ -44,29 +45,29 @@ def write_xyz(filename, coords):
     xn yn zn
     '''
 
-    assert(len(coords[0]) == 3)
+    assert (len(coords[0]) == 3)
 
     f = open(filename, 'w')
 
     l = len(coords)
     for i in range(l):
-        x,y,z = coords[i]
-        
+        x, y, z = coords[i]
+
         f.write(str(x) + ' ' + str(y) + ' ' + str(z) + '\n')
 
     f.close()
 
-    
+
 def read_xyzn(ps_filename):
     f = open(ps_filename)
 
     point_set = []
     for line in f:
         el = line.strip().split()
-        if (len(el)==6):
-            point = (float(el[0]), float(el[1]), float(el[2]),
-                     float(el[3]), float(el[4]), float(el[5]))
-        elif (len(el)==3):
+        if (len(el) == 6):
+            point = (float(el[0]), float(el[1]), float(el[2]), float(el[3]),
+                     float(el[4]), float(el[5]))
+        elif (len(el) == 3):
             point = (float(el[0]), float(el[1]), float(el[2]))
         else:
             print('This line contains neither 3 nor 6 elements')
@@ -77,5 +78,5 @@ def read_xyzn(ps_filename):
     return np.array(point_set)
 
 
-# Legal? 
+# Legal?
 #read_xyz = read_xyzn
